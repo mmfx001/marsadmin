@@ -39,10 +39,10 @@ const UsersEdit = () => {
 
   const handleSave = async () => {
     try {
-      await axios.put(`http://localhost:5001/students/${editingStudent}`, editedData);
+      await axios.patch(`http://localhost:5001/students/${editingStudent}`, editedData);
       setStudents((prevStudents) =>
         prevStudents.map((student) =>
-          student.id === editingStudent ? { ...editedData } : student
+          student.id === editingStudent ? { ...editedData, id: student.id } : student
         )
       );
       setEditingStudent(null);
@@ -50,6 +50,9 @@ const UsersEdit = () => {
       console.error('Error saving student:', error);
     }
   };
+
+
+
 
   const handleDelete = async (id) => {
     try {
@@ -65,7 +68,7 @@ const UsersEdit = () => {
   };
 
   const handleAddStudent = async () => {
-    const randomId = generateRandomId();
+    const randomId = `${generateRandomId()}`;
     const newStudent = {
       ...newStudentData,
       id: randomId,
@@ -153,7 +156,7 @@ const UsersEdit = () => {
           "requirement": "правильно поставлено карточки Закончить сайт до конца ",
           "materials": "https://lab.marsit.uz/media/project_images/examples/112/Flex_task_11_dars.png"
         }
-      
+
       ],
     };
 
