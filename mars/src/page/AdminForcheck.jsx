@@ -18,7 +18,6 @@ const AdminForcheck = () => {
 
     fetchTasks();
   }, []);
-
   const handleApprove = async (taskId, userId) => {
     if (!userId) {
       console.error('User ID is undefined');
@@ -33,28 +32,21 @@ const AdminForcheck = () => {
   
       // Fetch the current user data to update coins
       const userResponse = await axios.get(`http://localhost:5001/students/${userId}`);
-      console.log('Current user data:', userResponse.data);
-      
-      const currentCoins = parseInt(userResponse.data.coin, 10) || 0; // Parse to integer
-      console.log('Current coins:', currentCoins);
+      const currentCoins = parseInt(userResponse.data.coin, 10) || 0;
   
       // Add 10 coins to user
       const newCoins = currentCoins + 10;
-      console.log('New coins after addition:', newCoins);
-  
       await axios.patch(`http://localhost:5001/students/${userId}`, {
         coin: newCoins,
       });
   
-      setTasks((prevTasks) =>
-        prevTasks.filter((task) => task.id !== taskId)
-      ); // Remove task from UI after approval
+      // Remove task from UI after approval
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+  
     } catch (error) {
       console.error('Error approving task:', error);
     }
   };
-  
-  
   
 
   const handleReject = async (taskId) => {

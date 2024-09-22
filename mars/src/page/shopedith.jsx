@@ -20,9 +20,9 @@ const AdminPanel = () => {
     const newProduct = {
       id: editId || Date.now(), // Use current timestamp if not editing
       name,
-      coin,
-      imgUrl,
-      have,
+      price,
+      image,
+      quantity,
     };
 
     if (editId) {
@@ -46,9 +46,9 @@ const AdminPanel = () => {
   const handleEdit = (product) => {
     setEditId(product.id); // Set the product to be edited
     setName(product.name);
-    setCoin(product.coin);
-    setImgUrl(product.imgUrl);
-    setHave(product.have);
+    setCoin(product.price);
+    setImgUrl(product.image);
+    setHave(product.quantity);
   };
 
   return (
@@ -112,8 +112,8 @@ const AdminPanel = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="text-lg font-bold product-name">{product.name}</h3>
-                  <p className="text-gray-600 product-coin">Coin: {product.coin}</p>
-                  <p className="text-gray-600 product-have">Qolgan Soni: {product.have}</p>
+                  <p className="text-gray-600 product-coin">Coin: {product.price}</p>
+                  <p className="text-gray-600 product-have">Qolgan Soni: {product.quantity}</p>
                 </div>
                 <div className="flex gap-2">
                   <button

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import Admin from './admin';
-import UsersEdit from './page/usersedith';
 import AdminPanel from './page/shopedith';
 import AdminForcheck from './page/AdminForcheck'
+import UsersEdit from './page/usersedith';
 
 function App() {
     return (
