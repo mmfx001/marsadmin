@@ -1,568 +1,220 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const TeachersEdit = () => {
-  // State variables
   const [teachers, setTeachers] = useState([]);
-  const [editingTeacher, setEditingTeacher] = useState(null);
-  const [editedTeacherData, setEditedTeacherData] = useState({
-    name: '',
-    password: '',
-    students: '',
-    groupcount: '',
-    level: '',
-    groups: []
-  });
+  const [filials, setFilials] = useState([]);
   const [newTeacherData, setNewTeacherData] = useState({
     name: '',
     password: '',
     students: '',
     groupcount: '',
     level: '',
-    groups: []
+    groups: [{ groupNumber: '', time: '', studentscount: '', coins: '' }]
   });
+  const [newFilialData, setNewFilialData] = useState({ name: '', location: '' });
+  const [editingTeacher, setEditingTeacher] = useState(null);
+  const [editedTeacherData, setEditedTeacherData] = useState({});
 
-  // Fetch teachers on component mount
   useEffect(() => {
-    const fetchTeachers = async () => {
+    // Fetch teachers and filials from the API
+    const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/teachers');
-        setTeachers(response.data);
+        const teacherResponse = await axios.get('http://localhost:5001/teachers');
+        setTeachers(teacherResponse.data);
+        const filialResponse = await axios.get('http://localhost:5001/filials');
+        setFilials(filialResponse.data);
       } catch (error) {
-        console.error('Error fetching teachers:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    fetchTeachers();
+    fetchData();
   }, []);
 
-  // Function to generate random ID
-  const generateRandomId = () => {
-    return Math.floor(Math.random() * 10000).toString();
+  const handleNewTeacherChange = (e) => {
+    const { name, value } = e.target;
+    setNewTeacherData({ ...newTeacherData, [name]: value });
   };
 
-  // Handle adding a new teacher
+  const handleNewFilialChange = (e) => {
+    const { name, value } = e.target;
+    setNewFilialData({ ...newFilialData, [name]: value });
+  };
+
   const handleAddTeacher = async () => {
-    // Basic validation
-    if (
-      !newTeacherData.name ||
-      !newTeacherData.password ||
-      !newTeacherData.students ||
-      !newTeacherData.groupcount ||
-      !newTeacherData.level
-    ) {
-      alert('Please fill in all the fields.');
-      return;
-    }
-
-    // Ensure at least one group is added
-    if (newTeacherData.groups.length === 0) {
-      alert('Please add at least one group.');
-      return;
-    }
-
-    // Check for empty groupNumber
-    for (let group of newTeacherData.groups) {
-      if (group.groupNumber.trim() === '') {
-        alert('Group Number cannot be empty.');
-        return;
-      }
-    }
-
-    // Transform groups array to object with group numbers as keys
-    const groupsObject = {};
-    newTeacherData.groups.forEach(group => {
-      const { groupNumber } = group;
-      groupsObject[groupNumber] = [{
-        time: group.time,
-        studentscount: group.studentscount,
-        coins: group.coins,
-        group: group.groupNumber
-      }];
-    });
-
-    const newTeacher = {
-      id: generateRandomId(),
-      teacher: newTeacherData.name,
-      password: newTeacherData.password,
-      students: newTeacherData.students,
-      groupcount: newTeacherData.groupcount,
-      level: newTeacherData.level,
-      ...groupsObject
-    };
-
     try {
-      await axios.post('http://localhost:5001/teachers', newTeacher);
-      setTeachers(prev => [...prev, newTeacher]);
-      setNewTeacherData({
-        name: '',
-        password: '',
-        students: '',
-        groupcount: '',
-        level: '',
-        groups: []
-      });
+      const response = await axios.post('http://localhost:5001/teachers', newTeacherData);
+      setTeachers([...teachers, response.data]);
+      setNewTeacherData({ ...newTeacherData, name: '', password: '', students: '', groupcount: '', level: '', groups: [{ groupNumber: '', time: '', studentscount: '', coins: '' }] });
+    } catch (error) {
+      console.error('Error adding teacher:', error);
+    }
+    try {
+      const response = await axios.post('http://localhost:5001/rating', newTeacherData);
+      setTeachers([...teachers, response.data]);
+      setNewTeacherData({ ...newTeacherData, name: '', Retention: '', Umumiy: '', Ketganlar: '', QA: '', Usage:'' });
     } catch (error) {
       console.error('Error adding teacher:', error);
     }
   };
 
-  // Handle editing a teacher
-  const handleEditTeacher = (teacher) => {
-    setEditingTeacher(teacher.id);
-    // Transform group keys to array
-    const groupsArray = Object.keys(teacher)
-      .filter(key => !['id', 'teacher', 'password', 'students', 'groupcount', 'level'].includes(key))
-      .map(groupNumber => ({
-        groupNumber,
-        time: teacher[groupNumber][0].time,
-        studentscount: teacher[groupNumber][0].studentscount,
-        coins: teacher[groupNumber][0].coins
-      }));
-    setEditedTeacherData({
-      name: teacher.teacher,
-      password: teacher.password,
-      students: teacher.students,
-      groupcount: teacher.groupcount,
-      level: teacher.level,
-      groups: groupsArray
-    });
+  const handleAddFilial = async () => {
+    try {
+      const response = await axios.post('http://localhost:5001/filials', newFilialData);
+      setFilials([...filials, response.data]);
+      setNewFilialData({ name: '', location: '' });
+    } catch (error) {
+      console.error('Error adding filial:', error);
+    }
   };
 
-  // Handle saving edited teacher
+  const handleEditTeacher = (teacher) => {
+    setEditingTeacher(teacher);
+    setEditedTeacherData(teacher);
+  };
+
+  const handleEditedTeacherChange = (e) => {
+    const { name, value } = e.target;
+    setEditedTeacherData({ ...editedTeacherData, [name]: value });
+  };
+
   const handleSaveEditedTeacher = async () => {
-    // Basic validation
-    if (
-      !editedTeacherData.name ||
-      !editedTeacherData.password ||
-      !editedTeacherData.students ||
-      !editedTeacherData.groupcount ||
-      !editedTeacherData.level
-    ) {
-      alert('Please fill in all the fields.');
-      return;
-    }
-
-    // Ensure at least one group is present
-    if (editedTeacherData.groups.length === 0) {
-      alert('Please add at least one group.');
-      return;
-    }
-
-    // Check for empty groupNumber
-    for (let group of editedTeacherData.groups) {
-      if (group.groupNumber.trim() === '') {
-        alert('Group Number cannot be empty.');
-        return;
-      }
-    }
-
-    // Transform groups array to object with group numbers as keys
-    const groupsObject = {};
-    editedTeacherData.groups.forEach(group => {
-      const { groupNumber } = group;
-      groupsObject[groupNumber] = [{
-        time: group.time,
-        studentscount: group.studentscount,
-        coins: group.coins,
-        group: group.groupNumber
-      }];
-    });
-
-    const updatedTeacher = {
-      teacher: editedTeacherData.name,
-      password: editedTeacherData.password,
-      students: editedTeacherData.students,
-      groupcount: editedTeacherData.groupcount,
-      level: editedTeacherData.level,
-      ...groupsObject
-    };
-
     try {
-      await axios.patch(`http://localhost:5001/teachers/${editingTeacher}`, updatedTeacher);
-      setTeachers(prev =>
-        prev.map(t => t.id === editingTeacher ? { ...updatedTeacher, id: t.id } : t)
-      );
+      const response = await axios.put(`http://localhost:5001/teachers/${editingTeacher.id}`, editedTeacherData);
+      setTeachers(teachers.map(teacher => (teacher.id === editingTeacher.id ? response.data : teacher)));
       setEditingTeacher(null);
-      setEditedTeacherData({
-        name: '',
-        password: '',
-        students: '',
-        groupcount: '',
-        level: '',
-        groups: []
-      });
     } catch (error) {
       console.error('Error saving teacher:', error);
     }
   };
 
-  // Handle deleting a teacher
   const handleDeleteTeacher = async (id) => {
     try {
       await axios.delete(`http://localhost:5001/teachers/${id}`);
-      setTeachers(prev => prev.filter(t => t.id !== id));
+      setTeachers(teachers.filter(teacher => teacher.id !== id));
     } catch (error) {
       console.error('Error deleting teacher:', error);
     }
   };
 
-  // Handle changes in new teacher form inputs
-  const handleNewTeacherChange = (e) => {
-    const { name, value } = e.target;
-    setNewTeacherData(prev => ({ ...prev, [name]: value }));
-  };
-
-  // Handle changes in edited teacher form inputs
-  const handleEditedTeacherChange = (e) => {
-    const { name, value } = e.target;
-    setEditedTeacherData(prev => ({ ...prev, [name]: value }));
-  };
-
-  // Add a new group to the new teacher form
   const addNewGroup = () => {
-    setNewTeacherData(prev => ({
-      ...prev,
-      groups: [...prev.groups, { groupNumber: '', time: '', studentscount: '', coins: '' }]
-    }));
+    setNewTeacherData({
+      ...newTeacherData,
+      groups: [...newTeacherData.groups, { groupNumber: '', time: '', studentscount: '', coins: '' }]
+    });
   };
 
-  // Remove a group from the new teacher form
   const removeGroup = (index) => {
-    setNewTeacherData(prev => ({
-      ...prev,
-      groups: prev.groups.filter((_, i) => i !== index)
-    }));
+    setNewTeacherData({
+      ...newTeacherData,
+      groups: newTeacherData.groups.filter((_, i) => i !== index)
+    });
   };
 
-  // Add a new group to the edited teacher form
   const addEditedGroup = () => {
-    setEditedTeacherData(prev => ({
-      ...prev,
-      groups: [...prev.groups, { groupNumber: '', time: '', studentscount: '', coins: '' }]
-    }));
+    setEditedTeacherData({
+      ...editedTeacherData,
+      groups: [...editedTeacherData.groups, { groupNumber: '', time: '', studentscount: '', coins: '' }]
+    });
   };
 
-  // Remove a group from the edited teacher form
   const removeEditedGroup = (index) => {
-    setEditedTeacherData(prev => ({
-      ...prev,
-      groups: prev.groups.filter((_, i) => i !== index)
-    }));
-  };
-
-  // Handle changes in group fields for new teacher form
-  const handleNewGroupChange = (index, e) => {
-    const { name, value } = e.target;
-    setNewTeacherData(prev => ({
-      ...prev,
-      groups: prev.groups.map((group, i) =>
-        i === index ? { ...group, [name]: value } : group
-      )
-    }));
-  };
-
-  // Handle changes in group fields for edited teacher form
-  const handleEditedGroupChange = (index, e) => {
-    const { name, value } = e.target;
-    setEditedTeacherData(prev => ({
-      ...prev,
-      groups: prev.groups.map((group, i) =>
-        i === index ? { ...group, [name]: value } : group
-      )
-    }));
+    setEditedTeacherData({
+      ...editedTeacherData,
+      groups: editedTeacherData.groups.filter((_, i) => i !== index)
+    });
   };
 
   return (
-    <div className="container mx-auto mt-10 p-5">
-      <h2 className="text-3xl font-bold text-blue-500 mb-5">Manage Teachers</h2>
+    <div className="max-w-4xl mx-auto p-5 bg-white rounded shadow-md">
+      <h1 className="text-2xl font-bold mb-5 text-center">Edit Teachers</h1>
 
-      {/* Add New Teacher Form */}
-      <div className="mb-10">
-        <h3 className="text-2xl font-bold">Add New Teacher</h3>
-        <input
-          type="text"
-          name="name"
-          value={newTeacherData.name}
-          onChange={handleNewTeacherChange}
-          className="w-full p-2 mb-3 border rounded-md"
-          placeholder="Name"
-        />
-        <input
-          type="password"
-          name="password"
-          value={newTeacherData.password}
-          onChange={handleNewTeacherChange}
-          className="w-full p-2 mb-3 border rounded-md"
-          placeholder="Password"
-        />
-        <input
-          type="number"
-          name="students"
-          value={newTeacherData.students}
-          onChange={handleNewTeacherChange}
-          className="w-full p-2 mb-3 border rounded-md"
-          placeholder="Number of Students"
-        />
-        <input
-          type="number"
-          name="groupcount"
-          value={newTeacherData.groupcount}
-          onChange={handleNewTeacherChange}
-          className="w-full p-2 mb-3 border rounded-md"
-          placeholder="Group Count"
-        />
-        <input
-          type="text"
-          name="level"
-          value={newTeacherData.level}
-          onChange={handleNewTeacherChange}
-          className="w-full p-2 mb-3 border rounded-md"
-          placeholder="Level"
-        />
-
-        {/* Groups Section */}
-        <div className="mb-3">
-          <h4 className="text-xl font-semibold">Groups</h4>
-          {newTeacherData.groups.map((group, index) => (
-            <div key={index} className="flex items-center mb-2">
-              <input
-                type="text"
-                name="groupNumber"
-                value={group.groupNumber}
-                onChange={(e) => handleNewGroupChange(index, e)}
-                className="w-24 p-2 mr-2 border rounded-md"
-                placeholder="Group Number"
-              />
-              <input
-                type="text"
-                name="time"
-                value={group.time}
-                onChange={(e) => handleNewGroupChange(index, e)}
-                className="w-32 p-2 mr-2 border rounded-md"
-                placeholder="Time"
-              />
-              <input
-                type="number"
-                name="studentscount"
-                value={group.studentscount}
-                onChange={(e) => handleNewGroupChange(index, e)}
-                className="w-32 p-2 mr-2 border rounded-md"
-                placeholder="Students Count"
-              />
-              <input
-                type="number"
-                name="coins"
-                value={group.coins}
-                onChange={(e) => handleNewGroupChange(index, e)}
-                className="w-24 p-2 mr-2 border rounded-md"
-                placeholder="Coins"
-              />
-              <button
-                type="button" // Important: Specify type="button"
-                onClick={() => removeGroup(index)}
-                className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          <button
-            type="button" // Important: Specify type="button"
-            onClick={addNewGroup}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-          >
-            Add Group
-          </button>
+      {/* New Teacher Form */}
+      <div className="mb-8 p-4 border border-gray-300 rounded bg-gray-50">
+        <h2 className="text-xl font-semibold mb-4">Add New Teacher</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <input type="text" name="name" value={newTeacherData.name} onChange={handleNewTeacherChange} className="p-2 border border-gray-300 rounded" placeholder="Name" />
+          <input type="password" name="password" value={newTeacherData.password} onChange={handleNewTeacherChange} className="p-2 border border-gray-300 rounded" placeholder="Password" />
+          <input type="text" name="students" value={newTeacherData.students} onChange={handleNewTeacherChange} className="p-2 border border-gray-300 rounded" placeholder="Students" />
+          <input type="text" name="groupcount" value={newTeacherData.groupcount} onChange={handleNewTeacherChange} className="p-2 border border-gray-300 rounded" placeholder="Group Count" />
+          <input type="text" name="level" value={newTeacherData.level} onChange={handleNewTeacherChange} className="p-2 border border-gray-300 rounded" placeholder="Level" />
         </div>
 
-        <button
-          type="button" // Important: Specify type="button"
-          onClick={handleAddTeacher}
-          className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-        >
-          Add Teacher
-        </button>
+        {/* Group management for new teacher */}
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold">Groups</h3>
+          {newTeacherData.groups.map((group, index) => (
+            <div key={index} className="grid grid-cols-4 gap-2 mb-2">
+              <input type="text" placeholder="Group Number" value={group.groupNumber} onChange={(e) => {
+                const updatedGroups = [...newTeacherData.groups];
+                updatedGroups[index].groupNumber = e.target.value;
+                setNewTeacherData({ ...newTeacherData, groups: updatedGroups });
+              }} className="p-2 border border-gray-300 rounded" />
+              <input type="text" placeholder="Time" value={group.time} onChange={(e) => {
+                const updatedGroups = [...newTeacherData.groups];
+                updatedGroups[index].time = e.target.value;
+                setNewTeacherData({ ...newTeacherData, groups: updatedGroups });
+              }} className="p-2 border border-gray-300 rounded" />
+              <input type="text" placeholder="Students Count" value={group.studentscount} onChange={(e) => {
+                const updatedGroups = [...newTeacherData.groups];
+                updatedGroups[index].studentscount = e.target.value;
+                setNewTeacherData({ ...newTeacherData, groups: updatedGroups });
+              }} className="p-2 border border-gray-300 rounded" />
+              <input type="text" placeholder="Coins" value={group.coins} onChange={(e) => {
+                const updatedGroups = [...newTeacherData.groups];
+                updatedGroups[index].coins = e.target.value;
+                setNewTeacherData({ ...newTeacherData, groups: updatedGroups });
+              }} className="p-2 border border-gray-300 rounded" />
+              <button onClick={() => removeGroup(index)} className="bg-red-500 text-white rounded p-2">Remove</button>
+            </div>
+          ))}
+          <button onClick={addNewGroup} className="bg-blue-500 text-white rounded p-2">Add Group</button>
+        </div>
+
+        <button onClick={handleAddTeacher} className="bg-green-500 text-white rounded p-2 mt-4">Add Teacher</button>
+      </div>
+
+      {/* New Filial Form */}
+      <div className="mb-8 p-4 border border-gray-300 rounded bg-gray-50">
+        <h2 className="text-xl font-semibold mb-4">Add New Filial</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <input type="text" name="name" value={newFilialData.name} onChange={handleNewFilialChange} className="p-2 border border-gray-300 rounded" placeholder="Filial Name" />
+          <input type="text" name="location" value={newFilialData.location} onChange={handleNewFilialChange} className="p-2 border border-gray-300 rounded" placeholder="Location" />
+        </div>
+        <button onClick={handleAddFilial} className="bg-green-500 text-white rounded p-2 mt-4">Add Filial</button>
       </div>
 
       {/* Teachers List */}
-      {teachers && teachers.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {teachers.map((teacher) => (
-            <div key={teacher.id} className="border p-4 rounded-md shadow-md bg-white">
-              {editingTeacher === teacher.id ? (
-                <>
-                  <input
-                    type="text"
-                    name="name"
-                    value={editedTeacherData.name}
-                    onChange={handleEditedTeacherChange}
-                    className="w-full p-2 mb-3 border rounded-md"
-                    placeholder="Name"
-                  />
-                  <input
-                    type="password"
-                    name="password"
-                    value={editedTeacherData.password}
-                    onChange={handleEditedTeacherChange}
-                    className="w-full p-2 mb-3 border rounded-md"
-                    placeholder="Password"
-                  />
-                  <input
-                    type="number"
-                    name="students"
-                    value={editedTeacherData.students}
-                    onChange={handleEditedTeacherChange}
-                    className="w-full p-2 mb-3 border rounded-md"
-                    placeholder="Number of Students"
-                  />
-                  <input
-                    type="number"
-                    name="groupcount"
-                    value={editedTeacherData.groupcount}
-                    onChange={handleEditedTeacherChange}
-                    className="w-full p-2 mb-3 border rounded-md"
-                    placeholder="Group Count"
-                  />
-                  <input
-                    type="text"
-                    name="level"
-                    value={editedTeacherData.level}
-                    onChange={handleEditedTeacherChange}
-                    className="w-full p-2 mb-3 border rounded-md"
-                    placeholder="Level"
-                  />
-
-                  {/* Groups Section */}
-                  <div className="mb-3">
-                    <h4 className="text-xl font-semibold">Groups</h4>
-                    {editedTeacherData.groups.map((group, index) => (
-                      <div key={index} className="flex items-center mb-2">
-                        <input
-                          type="text"
-                          name="groupNumber"
-                          value={group.groupNumber}
-                          onChange={(e) => handleEditedGroupChange(index, e)}
-                          className="w-24 p-2 mr-2 border rounded-md"
-                          placeholder="Group Number"
-                        />
-                        <input
-                          type="text"
-                          name="time"
-                          value={group.time}
-                          onChange={(e) => handleEditedGroupChange(index, e)}
-                          className="w-32 p-2 mr-2 border rounded-md"
-                          placeholder="Time"
-                        />
-                        <input
-                          type="number"
-                          name="studentscount"
-                          value={group.studentscount}
-                          onChange={(e) => handleEditedGroupChange(index, e)}
-                          className="w-32 p-2 mr-2 border rounded-md"
-                          placeholder="Students Count"
-                        />
-                        <input
-                          type="number"
-                          name="coins"
-                          value={group.coins}
-                          onChange={(e) => handleEditedGroupChange(index, e)}
-                          className="w-24 p-2 mr-2 border rounded-md"
-                          placeholder="Coins"
-                        />
-                        <button
-                          type="button" // Important: Specify type="button"
-                          onClick={() => removeEditedGroup(index)}
-                          className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      type="button" // Important: Specify type="button"
-                      onClick={addEditedGroup}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                    >
-                      Add Group
-                    </button>
-                  </div>
-
-                  <div className="flex">
-                    <button
-                      type="button" // Important: Specify type="button"
-                      onClick={handleSaveEditedTeacher}
-                      className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600"
-                    >
-                      Save
-                    </button>
-                    <button
-                      type="button" // Important: Specify type="button"
-                      onClick={() => {
-                        setEditingTeacher(null);
-                        setEditedTeacherData({
-                          name: '',
-                          password: '',
-                          students: '',
-                          groupcount: '',
-                          level: '',
-                          groups: []
-                        });
-                      }}
-                      className="ml-2 text-gray-500 px-4 py-2 border rounded-md hover:bg-gray-100"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <p className="text-lg font-semibold">Name: {teacher.teacher}</p>
-                  <p>Password: {teacher.password}</p>
-                  <p>Students: {teacher.students}</p>
-                  <p>Group Count: {teacher.groupcount}</p>
-                  <p>Level: {teacher.level}</p>
-                  <div className="mt-2">
-                    <h4 className="font-semibold">Groups:</h4>
-                    {Object.keys(teacher)
-                      .filter(key => !['id', 'teacher', 'password', 'students', 'groupcount', 'level'].includes(key))
-                      .map((groupNumber) => (
-                        <div key={groupNumber} className="ml-4">
-                          <p>Group Number: {groupNumber}</p>
-                          {teacher[groupNumber].map((group, idx) => (
-                            <div key={idx} className="ml-4">
-                              <p>Time: {group.time}</p>
-                              <p>Students Count: {group.studentscount}</p>
-                              <p>Coins: {group.coins}</p>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                  </div>
-                  <div className="flex mt-4">
-                    <button
-                      type="button" // Important: Specify type="button"
-                      onClick={() => handleEditTeacher(teacher)}
-                      className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button" // Important: Specify type="button"
-                      onClick={() => handleDeleteTeacher(teacher.id)}
-                      className="ml-2 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p>No teachers found.</p>
-      )}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Teachers List</h2>
+        {teachers.map((teacher) => (
+          <div key={teacher.id} className="border p-4 mb-4 rounded bg-gray-50">
+            {editingTeacher && editingTeacher.id === teacher.id ? (
+              <>
+                <h3 className="text-lg font-semibold">Editing Teacher</h3>
+                <input type="text" name="name" value={editedTeacherData.name} onChange={handleEditedTeacherChange} className="p-2 border border-gray-300 rounded mb-2" placeholder="Name" />
+                <input type="password" name="password" value={editedTeacherData.password} onChange={handleEditedTeacherChange} className="p-2 border border-gray-300 rounded mb-2" placeholder="Password" />
+                <input type="text" name="students" value={editedTeacherData.students} onChange={handleEditedTeacherChange} className="p-2 border border-gray-300 rounded mb-2" placeholder="Students" />
+                <input type="text" name="groupcount" value={editedTeacherData.groupcount} onChange={handleEditedTeacherChange} className="p-2 border border-gray-300 rounded mb-2" placeholder="Group Count" />
+                <input type="text" name="level" value={editedTeacherData.level} onChange={handleEditedTeacherChange} className="p-2 border border-gray-300 rounded mb-2" placeholder="Level" />
+                
+                <button onClick={handleSaveEditedTeacher} className="bg-green-500 text-white rounded p-2">Save</button>
+                <button onClick={() => setEditingTeacher(null)} className="bg-gray-500 text-white rounded p-2 ml-2">Cancel</button>
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-semibold">{teacher.name}</h3>
+                <p>Students: {teacher.students}</p>
+                <p>Group Count: {teacher.groupcount}</p>
+                <p>Level: {teacher.level}</p>
+                <button onClick={() => handleEditTeacher(teacher)} className="bg-blue-500 text-white rounded p-2">Edit</button>
+                <button onClick={() => handleDeleteTeacher(teacher.id)} className="bg-red-500 text-white rounded p-2 ml-2">Delete</button>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
