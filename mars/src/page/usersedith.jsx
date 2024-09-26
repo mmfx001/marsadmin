@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const UsersEdit = () => {
   const [students, setStudents] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [editingStudent, setEditingStudent] = useState(null);
   const [editedData, setEditedData] = useState({
     name: '',
@@ -11,30 +12,40 @@ const UsersEdit = () => {
     balance: '',
     attendance: '',
     xp: '',
-    group: ''
+    group: '',
+    teacher: '',
+    tolov: ''
   });
   const [newStudentData, setNewStudentData] = useState({
     name: '',
     league: '',
-    group: ''
+    group: '',
+    teacher: ''
   });
+  const [availableGroupsAdd, setAvailableGroupsAdd] = useState([]);
+  const [availableGroupsEdit, setAvailableGroupsEdit] = useState([]);
 
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/students');
-        setStudents(response.data);
+        const [studentsResponse, teachersResponse] = await Promise.all([
+          axios.get('http://localhost:5001/students'),
+          axios.get('http://localhost:5001/teachers') // Assumed endpoint for teachers
+        ]);
+        setStudents(studentsResponse.data);
+        setTeachers(teachersResponse.data);
       } catch (error) {
-        console.error('Error fetching students:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    fetchStudents();
+    fetchData();
   }, []);
 
   const handleEdit = (student) => {
     setEditingStudent(student.id);
     setEditedData({ ...student });
+    setAvailableGroupsEdit(getGroupsByTeacher(student.teacher));
   };
 
   const handleSave = async () => {
@@ -46,127 +57,154 @@ const UsersEdit = () => {
         )
       );
       setEditingStudent(null);
+      setAvailableGroupsEdit([]);
     } catch (error) {
       console.error('Error saving student:', error);
     }
   };
 
-
-
-
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:5001/students/${id}`);
-      setStudents(students.filter((student) => student.id !== id));
+      setStudents((prevStudents) => prevStudents.filter((student) => student.id !== id));
     } catch (error) {
       console.error('Error deleting student:', error);
     }
   };
 
   const generateRandomId = () => {
-    return Math.floor(Math.random() * 10000);
+    return Math.floor(Math.random() * 10000).toString();
   };
 
   const handleAddStudent = async () => {
-    const randomId = `${generateRandomId()}`;
+    // Basic validation
+    if (!newStudentData.name || !newStudentData.league || !newStudentData.teacher || !newStudentData.group) {
+      alert('Please fill in all the fields.');
+      return;
+    }
+
+    const randomId = generateRandomId();
     const newStudent = {
       ...newStudentData,
       id: randomId,
-      password: randomId.toString(),
+      password: randomId,
       coins: 0,
       balance: 0,
+      tolov: 0,
       attendance: 0,
       xp: 0,
       tasks: [
         {
-          id: "1",
-          Topic: "Введение Front-End",
-          description: "Создайте небольшой информационный сайт о ceбе с помощью теги которые вы сегодня узнали на уроке",
-          requirement: "Использование тегов заголовков",
-          materials: "https://lab.marsit.uz/media/project_images/examples/289/4.4_-_homework.mp4"
+          "id": "1",
+          "Topic": "Введение Front-End",
+          "description": "Создайте небольшой информационный сайт о себе с помощью тегов, которые вы сегодня узнали на уроке.",
+          "requirement": "Использование тегов заголовков.",
+          "materials": "https://lab.marsit.uz/media/project_images/examples/289/4.4_-_homework.mp4"
         },
-        ,
         {
           "id": "2",
           "Topic": "HTML теги и их атрибуты",
-          "description": "Создайте мини-сайт о ceбе, используя теги, которые вы сегодня узнали на уроке",
-          "requirement": "И спользование тег а использование тег mark задача выполнена до конца ",
+          "description": "Создайте мини-сайт о себе, используя теги, которые вы сегодня узнали на уроке.",
+          "requirement": "Использование тегов, включая тег <mark>.",
           "materials": "https://lab.marsit.uz/media/project_images/examples/103/Homework2.png"
         },
         {
           "id": "3",
           "Topic": "Iframe vs Img",
-          "description": "Создайте небольшой информационный сайт о ceбе с помощью теги которые вы сегодня узнали на уроке",
-          "requirement": " Использование тегов img Информация о двух известных людях использование тег Iframe  использование тег <a>   Сайт доработан до конца ",
+          "description": "Создайте небольшой информационный сайт о себе с помощью тегов, которые вы сегодня узнали на уроке.",
+          "requirement": "Использование тегов <img> и <iframe>, а также тег <a>.",
           "materials": "https://lab.marsit.uz/media/project_images/examples/104/homework3.png"
         },
         {
           "id": "4",
           "Topic": "Список тегов",
-          "description": "Создайте небольшой сайт с информацией о Mars It School, используя теги Orderedи Unordered Придайте ему стиль с тегами, которые мы узнали сегодня.",
-          "requirement": " Использование списки тегов использование тег img  заданный inline стиль использованиу тег a  ",
+          "description": "Создайте небольшой сайт с информацией о Mars It School, используя теги Ordered и Unordered, и придайте ему стиль с помощью тегов, которые мы узнали сегодня.",
+          "requirement": "Использование списков тегов, тегов <img>, встроенных стилей и тега <a>.",
           "materials": "https://lab.marsit.uz/media/project_images/examples/105/homework4.png"
         },
         {
           "id": "5",
           "Topic": "Введение Css",
-          "description": "Создайте небольшую веб-страницу на основе сегодняшней темы и используйте там стили,",
-          "requirement": "Правильно открыто Css файл использование h1  Использование стиль border Работа с цветами  ",
+          "description": "Создайте небольшую веб-страницу на основе сегодняшней темы и используйте стили.",
+          "requirement": "Правильное подключение CSS файла, использование тега <h1>, стилей border и работа с цветами.",
           "materials": "https://lab.marsit.uz/media/project_images/examples/106/homework5.png"
         },
         {
           "id": "6",
           "Topic": "Теги формы",
           "description": "Создайте небольшую форму, используя теги формы, и настройте ее стиль.",
-          "requirement": "Типы инпуты установлены правильно использование тег button  Файл Css открыт, и цвета закрашенный с помощью класса использование input ",
+          "requirement": "Правильные типы инпутов, использование тега <button>, открытый CSS файл, использование классов для закрашивания цветов и тегов <input>.",
           "materials": "https://lab.marsit.uz/media/project_images/examples/107/homework6.png"
         },
         {
           "id": "7",
           "Topic": "Box modeling",
-          "description": "Создайте небольшой сайт о Margin , Padding , Border,Forms",
-          "requirement": "использование теги форм  Тексты вынесены в середину  использование margin и padding  Применение цвета с помощью CSS ",
+          "description": "Создайте небольшой сайт о Margin, Padding, Border и Forms.",
+          "requirement": "Использование тегов форм, центрирование текстов, использование margin и padding, применение цветов с помощью CSS.",
           "materials": "https://lab.marsit.uz/media/project_images/examples/108/Homework7.png"
         },
         {
           "id": "8",
           "Topic": "Table",
-          "description": "Создайте небольшой таблица с помощью Table",
-          "requirement": "Создание таблица  Задный фон задано с прмощью cssтаблица поставлено на середину  ",
+          "description": "Создайте небольшую таблицу с помощью тега <table>.",
+          "requirement": "Создание таблицы, задний фон задан с помощью CSS, таблица выровнена по центру.",
           "materials": "https://lab.marsit.uz/media/project_images/examples/109/Homework8.png"
         },
         {
           "id": "9",
           "Topic": "FlexBox",
-          "description": "Выполните задачу с помощью FlexBox",
-          "requirement": "ипользование FlexBox Цвета даны с помощью CSS ",
+          "description": "Выполните задачу с помощью FlexBox.",
+          "requirement": "Использование FlexBox, применение цветов с помощью CSS.",
           "materials": "https://lab.marsit.uz/media/project_images/examples/110/Flex9.png"
         },
         {
           "id": "10",
           "Topic": "Container",
-          "description": "Выполните задание до конца, используя контейнер",
-          "requirement": "Закончить проект До конца ",
+          "description": "Выполните задание до конца, используя контейнер.",
+          "requirement": "Закончить проект полностью.",
           "materials": "https://lab.marsit.uz/media/project_images/examples/111/Container.png"
         },
         {
           "id": "11",
           "Topic": "Практика FlexBox",
-          "description": "Сделать проект до конца",
-          "requirement": "правильно поставлено карточки Закончить сайт до конца ",
+          "description": "Сделать проект до конца.",
+          "requirement": "Правильно расположены карточки, сайт полностью завершен.",
           "materials": "https://lab.marsit.uz/media/project_images/examples/112/Flex_task_11_dars.png"
         }
-
       ],
     };
 
     try {
       await axios.post('http://localhost:5001/students', newStudent);
-      setStudents([...students, newStudent]);
-      setNewStudentData({ name: '', league: '', group: '' });
+      setStudents((prevStudents) => [...prevStudents, newStudent]);
+      setNewStudentData({ name: '', league: '', group: '', teacher: '' });
+      setAvailableGroupsAdd([]);
     } catch (error) {
       console.error('Error adding student:', error);
     }
+  };
+
+  const getGroupsByTeacher = (teacherName) => {
+    const teacher = teachers.find((t) => t.teacher === teacherName);
+    if (teacher) {
+      // Extract group keys from teacher object excluding other properties
+      return Object.keys(teacher).filter(key => !['id', 'teacher', 'password', 'students', 'groupcount', 'level'].includes(key));
+    }
+    return [];
+  };
+
+  const handleTeacherChangeAdd = (e) => {
+    const selectedTeacher = e.target.value;
+    const groups = getGroupsByTeacher(selectedTeacher);
+    setNewStudentData({ ...newStudentData, teacher: selectedTeacher, group: groups[0] || '' });
+    setAvailableGroupsAdd(groups);
+  };
+
+  const handleTeacherChangeEdit = (e) => {
+    const selectedTeacher = e.target.value;
+    const groups = getGroupsByTeacher(selectedTeacher);
+    setEditedData({ ...editedData, teacher: selectedTeacher, group: groups[0] || '' });
+    setAvailableGroupsEdit(groups);
   };
 
   return (
@@ -189,13 +227,31 @@ const UsersEdit = () => {
           className="w-full p-2 mb-3 border rounded-md"
           placeholder="League"
         />
-        <input
-          type="text"
+        <select
+          value={newStudentData.teacher}
+          onChange={handleTeacherChangeAdd}
+          className="w-full p-2 mb-3 border rounded-md"
+        >
+          <option value="">Select Teacher</option>
+          {teachers.map((teacher) => (
+            <option key={teacher.id} value={teacher.teacher}>
+              {teacher.teacher}
+            </option>
+          ))}
+        </select>
+        <select
           value={newStudentData.group}
           onChange={(e) => setNewStudentData({ ...newStudentData, group: e.target.value })}
           className="w-full p-2 mb-3 border rounded-md"
-          placeholder="Group"
-        />
+          disabled={!newStudentData.teacher}
+        >
+          <option value="">Select Group</option>
+          {availableGroupsAdd.map((group) => (
+            <option key={group} value={group}>
+              {group}
+            </option>
+          ))}
+        </select>
         <button
           onClick={handleAddStudent}
           className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
@@ -216,6 +272,13 @@ const UsersEdit = () => {
                     onChange={(e) => setEditedData({ ...editedData, name: e.target.value })}
                     className="w-full p-2 mb-3 border rounded-md"
                     placeholder="Name"
+                  />
+                  <input
+                    type="number"
+                    value={editedData.tolov}
+                    onChange={(e) => setEditedData({ ...editedData, tolov: e.target.value })}
+                    className="w-full p-2 mb-3 border rounded-md"
+                    placeholder="Tolov"
                   />
                   <input
                     type="text"
@@ -252,13 +315,31 @@ const UsersEdit = () => {
                     className="w-full p-2 mb-3 border rounded-md"
                     placeholder="XP"
                   />
-                  <input
-                    type="text"
+                  <select
+                    value={editedData.teacher}
+                    onChange={handleTeacherChangeEdit}
+                    className="w-full p-2 mb-3 border rounded-md"
+                  >
+                    <option value="">Select Teacher</option>
+                    {teachers.map((teacher) => (
+                      <option key={teacher.id} value={teacher.teacher}>
+                        {teacher.teacher}
+                      </option>
+                    ))}
+                  </select>
+                  <select
                     value={editedData.group}
                     onChange={(e) => setEditedData({ ...editedData, group: e.target.value })}
                     className="w-full p-2 mb-3 border rounded-md"
-                    placeholder="Group"
-                  />
+                    disabled={!editedData.teacher}
+                  >
+                    <option value="">Select Group</option>
+                    {availableGroupsEdit.map((group) => (
+                      <option key={group} value={group}>
+                        {group}
+                      </option>
+                    ))}
+                  </select>
                   <div className="flex">
                     <button
                       onClick={handleSave}
@@ -267,7 +348,10 @@ const UsersEdit = () => {
                       Save
                     </button>
                     <button
-                      onClick={() => setEditingStudent(null)}
+                      onClick={() => {
+                        setEditingStudent(null);
+                        setAvailableGroupsEdit([]);
+                      }}
                       className="ml-2 text-gray-500 px-4 py-2 border rounded-md hover:bg-gray-100"
                     >
                       Cancel
@@ -280,9 +364,11 @@ const UsersEdit = () => {
                   <p>League: {student.league}</p>
                   <p>Coins: {student.coins}</p>
                   <p>Balance: {student.balance}</p>
+                  <p>Tolov: {student.tolov}</p>
                   <p>Attendance: {student.attendance}</p>
                   <p>XP: {student.xp}</p>
                   <p>Group: {student.group}</p>
+                  <p>Teacher: {student.teacher}</p>
                   <div className="flex mt-4">
                     <button
                       onClick={() => handleEdit(student)}
