@@ -190,7 +190,7 @@ const UserDetail = () => {
                     ) : (
                         <tr>
                             <td colSpan="8" className="py-4 text-center">
-                                Ma'lumotlar topilmadi
+                                Ma'lumotlar topilmad
                             </td>
                         </tr>
                     )}
