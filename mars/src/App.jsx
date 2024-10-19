@@ -22,8 +22,11 @@ function App() {
                 <Route path='/adminr' element={<Adminn />} />
                 <Route path='/detail' element={<UserDetail />} />
                 <Route path='/teacher' element={<TeachersEdit />} />
-                <Route path='/admin' element={<AdminForcheck/>}/>
-        </Routes>
+                <Route path='/admin' element={<AdminForcheck />} />
+            <Route path="*" element={"note data"} />
+
+            </Routes>
+
         </div>
     );
 }

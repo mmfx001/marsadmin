@@ -8,7 +8,7 @@ import store from './store'; // Ensure your store is correctly configured in './
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>
-    <Router> {/* Wrap App with Router for routing */}
+    <Router>
       <App />
     </Router>
   </Provider>
