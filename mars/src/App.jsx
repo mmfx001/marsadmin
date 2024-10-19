@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import Admin from './admin';
-
-import UsersEdit from './page/usersedith';
+import AdminForcheck from './page/AdminForcheck'
+import TeachersEdit from './page/teacher';
 
 
 function App() {
@@ -11,8 +11,9 @@ function App() {
         <div>
             {/* Routes Setup */}<Admin/>
             <Routes>
-                <Route path='/' element={<UsersEdit />} />
-             
+          
+                <Route path='/teacher' element={<TeachersEdit />} />
+                <Route path='/admin' element={<AdminForcheck />} />
                 <Route path="*" element={"note data"} /> {/* 404 sahifasi */}
             </Routes>
         </div>
