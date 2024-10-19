@@ -12,10 +12,7 @@ import UserDetail from './page/userDetail';
 function App() {
     return (
         <div>
-            {/* Admin Component */}
-            <Admin />
-
-            {/* Routes Setup */}
+            {/* Routes Setup */}<Admin/>
             <Routes>
                 <Route path='/' element={<UsersEdit />} />
                 <Route path='/shop' element={<AdminPanel />} />
@@ -23,13 +20,12 @@ function App() {
                 <Route path='/detail' element={<UserDetail />} />
                 <Route path='/teacher' element={<TeachersEdit />} />
                 <Route path='/admin' element={<AdminForcheck />} />
-            <Route path="*" element={"note data"} />
-
+                <Route path="*" element={"note data"} /> {/* 404 sahifasi */}
             </Routes>
-
         </div>
     );
 }
+
 
 
 export default App;
