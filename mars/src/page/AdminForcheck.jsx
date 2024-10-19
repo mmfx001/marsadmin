@@ -10,7 +10,7 @@ const AdminForcheck = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/files');
+        const response = await axios.get('https://shoopjson-2.onrender.com/api/files');
         setTasks(response.data);
       } catch (error) {
         console.error('Error fetching tasks:', error);
@@ -29,12 +29,12 @@ const AdminForcheck = () => {
 
     try {
       // Update task status to approved
-      await axios.patch(`http://localhost:5001/files/${taskId}`, {
+      await axios.patch(`https://shoopjson-2.onrender.com/api/files/${taskId}`, {
         status: 'approved',
       });
 
       // Fetch the current user data to update coins
-      const userResponse = await axios.get(`http://localhost:5001/students/${userId}`);
+      const userResponse = await axios.get(`https://shoopjson-2.onrender.com/api/students/${userId}`);
       const currentCoins = parseInt(userResponse.data.balance, 10) || 0;
       const newc = parseInt(userResponse.data.coins, 10) || 0;
 
@@ -43,7 +43,7 @@ const AdminForcheck = () => {
       const newCoin = newc + 10;
       console.log(newCoins),
 
-      await axios.patch(`http://localhost:5001/students/${userId}`, {
+      await axios.patch(`https://shoopjson-2.onrender.com/api/students/${userId}`, {
         
         balance: newCoins,
         coins:newCoin
@@ -55,7 +55,7 @@ const AdminForcheck = () => {
         setApprovedTasks(prev => [...prev, approvedTask]);
         
         // Delete the task from the server
-        await axios.delete(`http://localhost:5001/files/${taskId}`);
+        await axios.delete(`https://shoopjson-2.onrender.com/api/files/${taskId}`);
         
         // Remove task from UI after deletion
         setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
@@ -76,7 +76,7 @@ const AdminForcheck = () => {
 
     try {
       // Update task status to rejected with comment
-      await axios.patch(`http://localhost:5001/files/${taskId}`, {
+      await axios.patch(`https://shoopjson-2.onrender.com/api/files/${taskId}`, {
         status: 'rejected',
         comment: rejectionComment,
       });

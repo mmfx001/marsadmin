@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchProducts = createAsyncThunk('products/fetchProducts', async () => {
-  const response = await fetch('http://localhost:5001/shop'); // API URL manzilingiz
+  const response = await fetch('https://shoopjson-2.onrender.com/api/shop'); // API URL manzilingiz
   return response.json();
 });
 

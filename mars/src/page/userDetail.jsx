@@ -11,7 +11,7 @@ const UserDetail = () => {
     useEffect(() => {
         const fetchRatingData = async () => {
             try {
-                const response = await axios.get("http://localhost:5001/rating");
+                const response = await axios.get("https://shoopjson-2.onrender.com/api/rating");
                 console.log("Rating data response:", response.data);
                 setRatingData(response.data || []);
             } catch (error) {
@@ -34,7 +34,7 @@ const UserDetail = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:5001/rating/${id}`);
+            await axios.delete(`https://shoopjson-2.onrender.com/api/rating/${id}`);
             setRatingData(ratingData.filter(rating => rating.id !== id));
         } catch (error) {
             console.error("Error deleting rating", error);
@@ -44,7 +44,7 @@ const UserDetail = () => {
 
     const handleAddRating = async () => {
         try {
-            const response = await axios.post("http://localhost:5001/rating", newRating);
+            const response = await axios.post("https://shoopjson-2.onrender.com/api/rating", newRating);
             setRatingData([...ratingData, response.data]);
             setNewRating({ name: '', QA: '', Ketganlar: '', Retention: '', Usage: '', Umumiy: '' }); // Reset input fields
         } catch (error) {

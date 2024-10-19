@@ -11,7 +11,7 @@ const Adminn = () => {
     useEffect(() => {
         const fetchRatingData = async () => {
             try {
-                const response = await axios.get("http://localhost:5001/rating"); // Change this URL to match your API endpoint
+                const response = await axios.get("https://shoopjson-2.onrender.com/api/rating"); // Change this URL to match your API endpoint
                 console.log("Rating data response:", response.data); // Log the API response
                 setRatingData(response.data || []); // Default to empty array if undefined
             } catch (error) {

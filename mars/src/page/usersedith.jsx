@@ -29,8 +29,8 @@ const UsersEdit = () => {
     const fetchData = async () => {
       try {
         const [studentsResponse, teachersResponse] = await Promise.all([
-          axios.get('http://localhost:5001/students'),
-          axios.get('http://localhost:5001/teachers') // Assumed endpoint for teachers
+          axios.get('https://shoopjson-2.onrender.com/api/students'),
+          axios.get('https://shoopjson-2.onrender.com/api/teachers') // Assumed endpoint for teachers
         ]);
         setStudents(studentsResponse.data);
         setTeachers(teachersResponse.data);
@@ -50,7 +50,7 @@ const UsersEdit = () => {
 
   const handleSave = async () => {
     try {
-      await axios.patch(`http://localhost:5001/students/${editingStudent}`, editedData);
+      await axios.patch(`https://shoopjson-2.onrender.com/api/students/${editingStudent}`, editedData);
       setStudents((prevStudents) =>
         prevStudents.map((student) =>
           student.id === editingStudent ? { ...editedData, id: student.id } : student
@@ -65,7 +65,7 @@ const UsersEdit = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5001/students/${id}`);
+      await axios.delete(`https://shoopjson-2.onrender.com/api/students/${id}`);
       setStudents((prevStudents) => prevStudents.filter((student) => student.id !== id));
     } catch (error) {
       console.error('Error deleting student:', error);
@@ -175,7 +175,7 @@ const UsersEdit = () => {
     };
 
     try {
-      await axios.post('http://localhost:5001/students', newStudent);
+      await axios.post('https://shoopjson-2.onrender.com/api/students', newStudent);
       setStudents((prevStudents) => [...prevStudents, newStudent]);
       setNewStudentData({ name: '', league: '', group: '', teacher: '' });
       setAvailableGroupsAdd([]);
