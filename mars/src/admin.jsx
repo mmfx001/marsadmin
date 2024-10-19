@@ -36,7 +36,7 @@ const Admin = ({ setLoggedInUser }) => {
     <nav className="bg-gray-800 text-white flex justify-between items-center p-4 shadow-md">
       {/* Logo yoki Admin nomi */}
       <div className="text-2xl font-bold">
-        <Link to="/usersedith">Admin</Link>
+        <Link to="/">Admin</Link>
       </div>
 
       {/* Navigatsiya havolalari */}
@@ -62,7 +62,7 @@ const Admin = ({ setLoggedInUser }) => {
         </button>
  
           <div className="absolute top-16 right-0 w-full bg-gray-800 text-white flex flex-col items-center space-y-2 p-4 md:hidden">
-            <Link className="hover:text-gray-300 transition duration-300" to="/usersedith">Users Edit</Link>
+            <Link className="hover:text-gray-300 transition duration-300" to="/">Users Edit</Link>
             <Link className="hover:text-gray-300 transition duration-300" to="/shop">Shop</Link>
             <Link className="hover:text-gray-300 transition duration-300" to="/teacher">Teacher</Link>
             <Link className="hover:text-gray-300 transition duration-300" to="/admin">Check</Link>
