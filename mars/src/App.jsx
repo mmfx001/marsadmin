@@ -17,7 +17,7 @@ function App() {
 
             {/* Routes Setup */}
             <Routes>
-                <Route path='/usersedith' element={<UsersEdit />} />
+                <Route path='/' element={<UsersEdit />} />
                 <Route path='/shop' element={<AdminPanel />} />
                 <Route path='/adminr' element={<Adminn />} />
                 <Route path='/detail' element={<UserDetail />} />

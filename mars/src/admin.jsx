@@ -41,7 +41,7 @@ const Admin = ({ setLoggedInUser }) => {
 
       {/* Navigatsiya havolalari */}
       <div className="hidden md:flex items-center space-x-6">
-        <Link className="hover:text-gray-300 transition duration-300" to="/usersedith">Users Edit</Link>
+        <Link className="hover:text-gray-300 transition duration-300" to="/">Users Edit</Link>
         <Link className="hover:text-gray-300 transition duration-300" to="/shop">Shop</Link>
         <Link className="hover:text-gray-300 transition duration-300" to="/detail">Detail</Link>
         <Link className="hover:text-gray-300 transition duration-300" to="/adminr">AdminReating</Link>
